@@ -1,0 +1,81 @@
+W_10~11
+
+10주차 부터 11주차까지는 물을 뽐아내며 찌그러지는 sofbody simulation에 주력했습니다.
+
+처음에는 SOFTBODY SIMULATION의 기반이 되는 오브젝트를 제작했습니다.
+
+test geometry에 point를 생성한 뒤, vex 라인을
+
+vector a = set(0,-.1*`chs("../N_ANIM/N_ANIM")`,0);
+@N = normalize(a+@P);
+
+통하여 null 노드에 N_ANIM이라는 파라미터를 작성하여 노말 방향을 방사형으로 위 아래로 움직이도록 애니메이팅 했으며
+GEOMETRY에 핀을 박아 copy to point 노드를 통해 뾰족한 GEOMETRY가 노말 방향을 따라 움직일 수 있도록 했으며.
+ATTRIBUTE VOP 노드를 통해 포인트에 색상과 DISPLACEMENT 값들을 만들어, 색과 위치가 변화하도록 조정했습니다.
+
+TORUS에 MOUNTAIN 노드를 사용해 불규칙적인 표면을 가진 COLLISION을 만들어 크기가 커졌다 작아지도록 애니메이션을 만들어,
+해당 COLLISION이 SOFTBODY SIMULATION을 적용한 GEOMTRY를 압박하도록 하여 모양을 잡았습니다.
+
+처음에는 뾰족한 GEOMETRY를 직접적으로 SOFTBODY 시뮬레이션을 적용했으나, 해당 GEOMETRY의 모양을 컨트롤 하기 어렵고, 시뮬레이션에 너무 오랜 시간이 걸려서.
+LINE 노드를 통하여 시뮬레이션을 진행한 뒤, SWEAP 노드를 통하여 해당 LINE에 GEOMTRY가 생성되는 방식으로. 시뮬레이션을 진행했습니다.
+그러나 이렇게 시뮬레이션을 진행할 경우, LINE 끼리의 유기적인 움직임이 서로의 COLLISION 에 의해 줄어들었고.
+그 모양이 제가 원하는 바와는 다르다고 생각이 되어. POINT DEFORM이 되는 기반 GEOMETRY를 SPHERE로 변경하여 시뮬레이션을 진행했습니다.
+
+SPEHERE GEOMTRY는 제 생각대로 잘 SOFTBODY SIMULATION이 적용되어서, VELLUM STRUCT 를 조절하여 SPHERE 원형이 유지가 되도록 하는 것 외에는 문제가 없었습니다.
+
+W_12~14
+
+12주차부터 14주차까지는 씬 세팅과 FLUID SIMULATION을 진행했습니다.
+
+원하는 플레이트가 카메라의 이동이 없는 영상이어서, 카메라 트래킹을 통해 플레이트 데이터를 확보하는 것은 힘들었고. 때문에 f-spy라는 blender 호환 프로그램을 통해 플레이트를 분석하여
+fbx 파일로 후디니에 불러왔습니다.
+
+11주차에 만들었던 오브젝트를 기반으로 하여 shelf의 emit particle fluid 기능을 사용하였고.
+오브젝트가 변화 하는 과정이 velocity에 적용되면 좋겠다는 생각이 들어 (오브젝트가 이동하면, 벨로시티도 해당 방향으로 생성되는 식으로), 해당 오브젝트에 trail 노드를 달아 pointvop 을 통해 연결하여,
+importpoint 노드를 통해 이전 오브젝트의 v 값이 그 다음 프레임의 velocity에 영향을 주도록 만들었습니다.
+
+또한 softbody를 적용한 오브젝트가 줄어듬에 따라 물이 밖으로 빠져나오는 효과를 주기 위해서 sphere geometry에 방사형의 velocity 값을 만들어 force feild를 제작하였고.
+fluid simulation에 타이밍에 맞춰 적용될 수 있도록 키 값을 주었습니다.
+
+이 과정에서 발생한 문제가 trail을 통해 만든 velocity가 force feild의 velocity와 함께 적용되지 않는 것이었는데.
+merge 노드를 사용해도 안되는 것이 이상하여, point velocity는 따로 volumerasterize를 하지 않아도 velocity로 적용된다는 것을 찾아 point velocity 값으로 fluid simulation에 적용해보았으나.
+원하는 대로는 잘 나오지 않았습니다.
+참고한 영상>
+https://www.youtube.com/watch?v=EhOSOcuQxTA&t=1055s
+결국 교수님이 알려주신 문제점은 해당 오브젝트에 density가 없었다는 것이었고, 이를 통해 이 문제를 해결했습니다.
+
+velocity 문제가 해결되고 나서 발생한 문제는, fluidsurface 의 옆면이 아예 사라져버린다는 것이었습니다. 원래 물이 없는 곳에서 물이 차오른다는 설정이었기 때문에, flip tank 는 사용하지 않고
+simulation을 진행했는데, 최종적으로 나오는 fluid surface의 옆면이, 빈 것처럼 투명해지는 문제가 발생했습니다.
+
+이를 해결하기 위해, flattening 기능을 사용해보기도 했으나 결국 문제는 shelf의 기능을 사용해서 자동으로 추가되는 fluidcompress가 옆면을 없애버린 것이었습니다.
+최종적으로 해당 노드를 통하지 않고 particlefluidsurface 노드를 적용시켜보니, 원하는대로 모양이 완성됐습니다.
+
+만들어진 시뮬레이션을 바탕으로 WHITEWATER SIMULATION을 적용시켰습니다.
+
+13~14주차 동안에는 fluid의 lookdev 진행에 중점을 뒀습니다.
+
+trasnparency 와 SSS를 활용하여 물이 투명하면서도, 어두운 빛깔을 가지게 하는게 가장 큰 과제였습니다.
+
+이 과정에서 또 문제가 발생했는데, 물 안 쪽의 GEOMETRY들이 빛을 받지 못하고 검게 나오는 현상이 있었습니다.
+
+리서치 결과 후디니에서는 TRANSPARENCY가 1로 설정되어 있다고 하더라도, 빛의 투과에 관해서는 하나의 솔리드한 오브젝트로 판단하고 렌더링한다는 것을 알게 되었고,
+매태리얼의 fake caustics를 활성화시켜 이를 해결할 수 있다는 것을 알게 됐습니다.
+
+W_14~15
+
+14, 15주차 동안에는 렌더링과 컴포지팅을 진행했습니다.
+
+렌더링 과정에서 가장 문제가 됐던 것은, 렌더링하기에 남은 시간과, 또 렌더링 과정에서 투명한 오브젝트가 투명하게 보이지 않는 문제가 발생했던 것이었습니다.
+이는 리서치 결과 refraction sample 항목이, 투명도의 굴절수를 만족하지 못해서 일어난 결과라는 것이 밝혀졌습니다.
+https://www.youtube.com/watch?v=U7I6BBaiZ1U
+샘플링 수를 조절하여 이 문제 역시 해결했습니다
+
+이후 컴포지팅 과정을 진행했는데, 컴포지팅 과정의 주요한 목표는 바닥에 반사되는 리플렉션이 렌더링한 결과와 맞지 않아, 리플렉션을 없애는 것과
+원본 플레이트의 위에 있는 글자를 제거하는 것이었습니다.
+keyer를 사용하여 적절한 부분의 라이팅만을 마스킹하여 그레이딩을 진행하고, 로토 페인트 툴을 사용하여 리무브를 완료하는 방식으로 컴포지팅은 쉽게 완료할 수 있었습니다.
+이 과정에서 플레이트의 그레인과 색을 적절히 보정하는 것은 문제가 되지 않았습니다.
+
+
+
+
+
